@@ -4,14 +4,21 @@ import React, { useState } from 'react';
 import useStyles from './styles';
 import { Avatar, Button, Paper, Grid, Typography, Container } from '@material-ui/core';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-
+import { GoogleLogin } from 'react-google-login';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+// import { signin, signup } from '../../actions/auth';
+import { AUTH } from '../../constants/actionTypes';
 import Input from './Input';
+import Icon from './Icon';
 
 function Auth() {
     const classes = useStyles();
 
     const handleSubmit = () => {};
     const handleChange = () => {};
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const [isSignup, setIsSignup] = useState(false);
     const switchMode = () => {
@@ -21,6 +28,20 @@ function Auth() {
     const [showPassword, setShowPassword] = useState(false);
     const handleShowPassword = () => {
         setShowPassword(prevShowPassword => !prevShowPassword);
+    };
+
+    const googleSuccess = res => {
+        const result = res?.profileObj;
+        const token = res?.tokenId;
+
+        try {
+            dispatch({ type: AUTH, data: { result }, token });
+            navigate('/');
+        } catch (error) {
+        }
+    };
+    const googleFailure = () => {
+        console.log('Google Sign In was unsuccessful. Try again later.');
     };
 
     return (
@@ -45,6 +66,17 @@ function Auth() {
                     <Button type='submit' fullWidth variant='contained' color='primary' className={classes.submit}>
                         {isSignup ? 'Sign Up' : 'Sign In'}
                     </Button>
+                    <GoogleLogin
+                        clientId='421909192942-pbcdd5511apjldbhd2t1bufssu48k8ro.apps.googleusercontent.com'
+                        render={renderProps => (
+                            <Button className={classes.googleButton} color='primary' fullWidth onClick={renderProps.onClick} disabled={renderProps.disabled} startIcon={<Icon />} variant='contained'>
+                                Google Sign In
+                            </Button>
+                        )}
+                        onSuccess={googleSuccess}
+                        onFailure={googleFailure}
+                        cookiePolicy='single_host_origin'
+                    />
                     <Grid item>
                         <Button onClick={switchMode}>{isSignup ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}</Button>
                     </Grid>
