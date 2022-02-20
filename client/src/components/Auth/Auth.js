@@ -7,7 +7,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import { GoogleLogin } from 'react-google-login';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-// import { signin, signup } from '../../actions/auth';
+import { signin, signup } from '../../actions/auth';
 import { AUTH } from '../../constants/actionTypes';
 import Input from './Input';
 import Icon from './Icon';

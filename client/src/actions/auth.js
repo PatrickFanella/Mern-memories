@@ -8,8 +8,8 @@ export const signin = (formData, router) => async dispatch => {
         const { data } = await api.signIn(formData);
 
         dispatch({ type: AUTH, data });
-
-        router.push('/');
+console.log(formData)
+        // router.push('/');
     } catch (error) {
         console.log(error);
     }
