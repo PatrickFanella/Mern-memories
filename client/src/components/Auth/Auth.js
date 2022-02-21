@@ -1,48 +1,62 @@
 /** @format */
 
 import React, { useState } from 'react';
-import useStyles from './styles';
-import { Avatar, Button, Paper, Grid, Typography, Container } from '@material-ui/core';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import { GoogleLogin } from 'react-google-login';
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { Avatar, Button, Paper, Grid, Typography, Container } from '@material-ui/core';
+import { useHistory } from 'react-router-dom';
+import { GoogleLogin } from 'react-google-login';
+import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+
+import Icon from './Icon';
 import { signin, signup } from '../../actions/auth';
 import { AUTH } from '../../constants/actionTypes';
+import useStyles from './styles';
 import Input from './Input';
-import Icon from './Icon';
 
-function Auth() {
+const initialState = { firstName: '', lastName: '', email: '', password: '', confirmPassword: '' };
+
+const SignUp = () => {
+    const [form, setForm] = useState(initialState);
+    const [isSignup, setIsSignup] = useState(false);
+    const dispatch = useDispatch();
+    const history = useHistory();
     const classes = useStyles();
 
-    const handleSubmit = () => {};
-    const handleChange = () => {};
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-
-    const [isSignup, setIsSignup] = useState(false);
-    const switchMode = () => {
-        setIsSignup(prevIsSignup => !prevIsSignup);
-    };
-
     const [showPassword, setShowPassword] = useState(false);
-    const handleShowPassword = () => {
-        setShowPassword(prevShowPassword => !prevShowPassword);
+    const handleShowPassword = () => setShowPassword(!showPassword);
+
+    const switchMode = () => {
+        setForm(initialState);
+        setIsSignup(prevIsSignup => !prevIsSignup);
+        setShowPassword(false);
     };
 
-    const googleSuccess = res => {
+    const handleSubmit = e => {
+        e.preventDefault();
+
+        if (isSignup) {
+            dispatch(signup(form, history));
+        } else {
+            dispatch(signin(form, history));
+        }
+    };
+
+    const googleSuccess = async res => {
         const result = res?.profileObj;
         const token = res?.tokenId;
 
         try {
-            dispatch({ type: AUTH, data: { result }, token });
-            navigate('/');
+            dispatch({ type: AUTH, data: { result, token } });
+
+            history.push('/');
         } catch (error) {
+            console.log(error);
         }
     };
-    const googleFailure = () => {
-        console.log('Google Sign In was unsuccessful. Try again later.');
-    };
+
+    const googleError = () => alert('Google Sign In was unsuccessful. Try again later');
+
+    const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
 
     return (
         <Container component='main' maxWidth='xs'>
@@ -50,7 +64,9 @@ function Auth() {
                 <Avatar className={classes.avatar}>
                     <LockOutlinedIcon />
                 </Avatar>
-                <Typography variant='h5'>{isSignup ? 'Sign Up' : 'Sign In'}</Typography>
+                <Typography component='h1' variant='h5'>
+                    {isSignup ? 'Sign up' : 'Sign in'}
+                </Typography>
                 <form className={classes.form} onSubmit={handleSubmit}>
                     <Grid container spacing={2}>
                         {isSignup && (
@@ -74,16 +90,20 @@ function Auth() {
                             </Button>
                         )}
                         onSuccess={googleSuccess}
-                        onFailure={googleFailure}
+                        onFailure={googleError}
                         cookiePolicy='single_host_origin'
                     />
-                    <Grid item>
-                        <Button onClick={switchMode}>{isSignup ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}</Button>
+                    <Grid container justify='flex-end'>
+                        <Grid item>
+                            <Button onClick={switchMode}>{isSignup ? 'Already have an account? Sign in' : "Don't have an account? Sign Up"}</Button>
+                        </Grid>
                     </Grid>
                 </form>
             </Paper>
         </Container>
     );
-}
+};
 
-export default Auth;
+export default SignUp;
+
+
